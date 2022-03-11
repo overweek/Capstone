@@ -3,8 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+<<<<<<< HEAD
         <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/layout/recipe_item.xml" value="0.33" />
+=======
+        <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/drawable/ic_launcher_background.xml" value="0.565625" />
+        <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/layout/activity_main.xml" value="0.5" />
+        <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/layout/recipe_item.xml" value="0.33" />
+        <entry key="..\:/Users/USER-PC/AndroidStudioProjects/Capstone/app/src/main/res/layout/recipe_page.xml" value="0.5" />
+>>>>>>> 7858116 (Initial commit)
       </map>
     </option>
   </component>

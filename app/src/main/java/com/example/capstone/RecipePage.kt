@@ -4,92 +4,82 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioManager
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-<<<<<<< HEAD
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
-import com.example.capstone.databinding.ActivityMainBinding
-=======
 import androidx.core.view.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.example.capstone.databinding.ActivityMainBinding
 import com.example.capstone.databinding.RecipePageBinding
->>>>>>> 7858116 (Initial commit)
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity() {
-<<<<<<< HEAD
+class RecipePage : AppCompatActivity() {
+
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var recognitionListener: RecognitionListener
-    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    private val binding by lazy { RecipePageBinding.inflate(layoutInflater) }
     private val handler: Handler by lazy { Handler(Looper.getMainLooper()) }//음성인식 무한 실행을 위한 핸들러 변수
     private var speechText: String = "null"//받은 음성
     private var tts: TextToSpeech? = null//TTS변수
     private var selectedRecipe: Int = 0// 선택된 레시피 번호
     private var recipeTextList = emptyArray<String>()//레시피 리스트
-    private var recipeURLList = emptyArray<String>()
+    private var recipeURLList = emptyArray<String>()//레시피 사진 리스트
+    private var recipeIngrList = emptyArray<String>()//재료 리스트
     var recipeText: String = ""
     var db = FirebaseFirestore.getInstance()
     var name : String = ""
     var ingredient : String = ""
     var picture : String = ""
     var recipePicture : String = ""
-    var i : Int = 0
-=======
-
-    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private var code : String ="ixpayhTvaQr46BKBbLFk"
->>>>>>> 7858116 (Initial commit)
+    var code : String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-<<<<<<< HEAD
+        code = intent?.getStringExtra("code")?: ""
+
         db.collection("recipe")
-            .document("hhkm1CqHH2WDc2J2lqwo")
+            .document(code)
             .get()
             .addOnSuccessListener { document ->
 
-                    name = document["name"] as String
-                    ingredient = document["ingredient"] as String
-                    recipeText= document["content"] as String
-                    picture = document["picture"] as String
-                    recipePicture = document["recipePicture"] as String
-                    recipeTextList = recipeText.split("@").toTypedArray()
-                    recipeURLList = recipePicture.split("@").toTypedArray()
-                    binding.title.text = name
-                    binding.ingredient.text = ingredient
-                    Glide.with(this).load(picture).into(binding.titlePhoto)
-                    val recipesList : ArrayList<Recipes> = arrayListOf()
-                    for (i in 0 until recipeTextList.size){
-                        recipesList.add(Recipes(recipeURLList[i], recipeTextList[i]))
-                    }
-                    muteNoti()
-                    requestPermission()
-                    setListener()
-                    makeTTS()
-                    show()
+                name = document["name"] as String
+                ingredient = document["ingredient"] as String
+                recipeText= document["content"] as String
+                picture = document["picture"] as String
+                recipePicture = document["recipePicture"] as String
+                recipeTextList = recipeText.split("@").toTypedArray()
+                recipeURLList = recipePicture.split("@").toTypedArray()
 
-                    binding.rvRecipe.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-                    binding.rvRecipe.setHasFixedSize(true)
-                    binding.rvRecipe.adapter = RecipeAdapter(recipesList)
+                binding.name.text = name
+                binding.ingredient.text = ingredient
+                Glide.with(this).load(picture).into(binding.titlePhoto)
+                val recipesList : ArrayList<Recipes> = arrayListOf()
+                for (i in 0 until recipeTextList.size){
+                    if(recipeURLList[i] == "empty")//없을때 안읽어주는거 고쳐 TTS읽을때 공백인식해서 다음으로 넘기게 만들어야함
+                        recipeURLList[i] = ""
+                    if(recipeTextList[i] == "empty")
+                        recipeTextList[i] = ""
+                    recipesList.add(Recipes(recipeURLList[i], recipeTextList[i]))
+                }
+                muteNoti()
+                requestPermission()
+                setListener()
+                makeTTS()
+                show()
+
+                binding.rvRecipe.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+                binding.rvRecipe.setHasFixedSize(true)
+                binding.rvRecipe.adapter = RecipeAdapter(recipesList)
             }
-
 
     }
 
@@ -113,12 +103,17 @@ class MainActivity : AppCompatActivity() {
         var intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,100)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 100)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,500)
+
         }
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
             setRecognitionListener(recognitionListener)
             startListening(intent)
         }
+
     }
 
     private fun requestPermission(){//권한 허가 요청
@@ -187,18 +182,27 @@ class MainActivity : AppCompatActivity() {
                     for (i in 0 until matches.size) {
                         speechText = matches[i]
                     }
-                }
-                if (speechText == "시작"){
-                    startTTS()
-                }
-                if(speechText == "다음"){
-                    nextTTS()
-                }
-                if(speechText == "이전"){
-                    prevTTS()
-                }
-                if(speechText == "멈춰"){
-                    stopTTS()
+                    if (speechText.contains("시작")){
+                        startTTS()
+                        autoScroll()
+                    }
+                    if(speechText.contains("다음")){
+                        nextTTS()
+                        autoScroll()
+                    }
+                    if(speechText.contains("이전")){
+                        prevTTS()
+                        autoScroll()
+                    }
+                    if(speechText.contains("멈춰")){
+                        stopTTS()
+                    }
+                    if(speechText.contains("빠르게")){
+
+                    }
+                    if (speechText.contains("느리게")){
+
+                    }
                 }
             }
 
@@ -222,38 +226,42 @@ class MainActivity : AppCompatActivity() {
         tts = TextToSpeech(this) { status ->
             if (status != TextToSpeech.ERROR) {
                 // 언어를 선택한다.
-                tts!!.language = Locale.KOREAN
+                tts?.language = Locale.KOREAN
             }
         }
     }
 
     private fun startTTS(){//TTS시작
-        tts!!.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
+        if(recipeTextList[selectedRecipe] == "")
+            selectedRecipe += 1
+        tts?.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
     }
 
     private fun nextTTS(){//다음 TTS
         selectedRecipe += 1
-        tts!!.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
+        tts?.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
+        if(selectedRecipe > recipeTextList.size){
+            selectedRecipe = 0
+        }
     }
 
     private fun prevTTS(){//이전 TTS
-        selectedRecipe =- 1
+        selectedRecipe -= 1
         if (selectedRecipe<0) {
             selectedRecipe = 0
         }
-        tts!!.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
+        tts?.speak(recipeTextList[selectedRecipe], TextToSpeech.QUEUE_FLUSH, null)
     }
 
     private fun stopTTS(){//TTS멈춰!!
-        tts!!.stop()
+        tts?.stop()
     }
-=======
-        binding.start.setOnClickListener {
-            val intent = Intent(this, RecipePage::class.java)
-            intent.putExtra("code", code)
-            startActivity(intent)
-        }
 
+    private fun autoScroll(){
+        if(selectedRecipe == 0)
+            binding.nestrdScrollView.scrollTo(0, binding.textView3.bottom)
+        else
+            binding.nestrdScrollView.scrollTo(0, binding.rvRecipe[selectedRecipe+1].bottom)
     }
->>>>>>> 7858116 (Initial commit)
+
 }

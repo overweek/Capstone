@@ -7,7 +7,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+<<<<<<< HEAD
 import com.example.capstone.R
+=======
+>>>>>>> 7858116 (Initial commit)
 
 class RecipeAdapter(val recipesList: ArrayList<Recipes>) : RecyclerView.Adapter<RecipeAdapter.CustomViewHolder>() {
 
