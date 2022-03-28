@@ -20,11 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<<<<<<< HEAD
-=======
-        <activity android:name=".RecipePage"
+        <activity
+            android:name=".RecipePage"
             />
->>>>>>> 7858116 (Initial commit)
     </application>
 
 </manifest>
