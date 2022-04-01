@@ -31,7 +31,9 @@ class RecipePage : AppCompatActivity() {
     private var selectedRecipe: Int = 0// 선택된 레시피 번호
     private var recipeTextList = emptyArray<String>()//레시피 리스트
     private var recipeURLList = emptyArray<String>()//레시피 사진 리스트
-    private var recipeIngrList = emptyArray<String>()//재료 리스트
+    private var ingrList = emptyArray<String>()//재료 리스트
+    private var ingrVolList = emptyArray<String>()//재료 수량 리스트
+    private var allIngrList = emptyArray<String>()
     var recipeText: String = ""
     var db = FirebaseFirestore.getInstance()
     var name : String = ""
@@ -58,12 +60,28 @@ class RecipePage : AppCompatActivity() {
                 recipePicture = document["recipePicture"] as String
                 recipeTextList = recipeText.split("@").toTypedArray()
                 recipeURLList = recipePicture.split("@").toTypedArray()
+                ingrList = ingredient.split("@").toTypedArray()
+                for (i in ingrList.indices){
+                    allIngrList = ingrList[i].split("#").toTypedArray()
+                    ingrList[i] = allIngrList[0]
+                    ingrVolList += allIngrList[1]
+                }
+                val sb = StringBuffer()
+                for (i in ingrList.indices){
+                    sb.append(ingrList[i]+ " ")
+                    if (i == ingrList.size-1){
+                        sb.append(ingrVolList[i])
+                    }
+                    else {
+                        sb.append(ingrVolList[i] + ",")
+                    }
+                }
 
                 binding.name.text = name
-                binding.ingredient.text = ingredient
+                binding.ingredient.text = sb
                 Glide.with(this).load(picture).into(binding.titlePhoto)
                 val recipesList : ArrayList<Recipes> = arrayListOf()
-                for (i in 0 until recipeTextList.size){
+                for (i in recipeTextList.indices){
                     if(recipeURLList[i] == "empty")//없을때 안읽어주는거 고쳐 TTS읽을때 공백인식해서 다음으로 넘기게 만들어야함
                         recipeURLList[i] = ""
                     if(recipeTextList[i] == "empty")
@@ -194,7 +212,7 @@ class RecipePage : AppCompatActivity() {
                         prevTTS()
                         autoScroll()
                     }
-                    if(speechText.contains("멈춰")){
+                    if(speechText.contains("정지")){
                         stopTTS()
                     }
                     if(speechText.contains("빠르게")){
